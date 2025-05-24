@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:translate/models/vocabulary.dart';
 import 'package:translate/services/vocabulary_service.dart';
 
@@ -11,8 +10,11 @@ class MatchingGameController extends GetxController {
   RxList<String> images = <String>[].obs;
   RxList<bool> wordSelected = <bool>[].obs;
   RxList<bool> imageSelected = <bool>[].obs;
-  RxInt? selectedWordIndex = null.obs as RxInt?;
-  RxInt? selectedImageIndex = null.obs as RxInt?;
+
+  // แก้ไขส่วนนี้
+  RxInt selectedWordIndex = (-1).obs; // ใช้ -1 แทน null
+  RxInt selectedImageIndex = (-1).obs; // ใช้ -1 แทน null
+
   RxInt matchedPairs = 0.obs;
 
   @override
@@ -31,19 +33,20 @@ class MatchingGameController extends GetxController {
     wordSelected.value = List.filled(words.length, false);
     imageSelected.value = List.filled(images.length, false);
 
-    selectedWordIndex = null.obs as RxInt?;
-    selectedImageIndex = null.obs as RxInt?;
+    selectedWordIndex.value = -1; // ใช้ -1 แทน null
+    selectedImageIndex.value = -1; // ใช้ -1 แทน null
     matchedPairs.value = 0;
   }
 
   void handleWordTap(int index) {
     if (wordSelected[index] || matchedPairs.value == words.length) return;
 
-    if (selectedWordIndex?.value == null) {
-      selectedWordIndex = index.obs;
+    if (selectedWordIndex.value == -1) {
+      // ตรวจสอบด้วย -1
+      selectedWordIndex.value = index;
       wordSelected[index] = true;
-    } else if (selectedWordIndex?.value == index) {
-      selectedWordIndex = null.obs as RxInt?;
+    } else if (selectedWordIndex.value == index) {
+      selectedWordIndex.value = -1;
       wordSelected[index] = false;
     }
   }
@@ -51,22 +54,23 @@ class MatchingGameController extends GetxController {
   void handleImageTap(int index) {
     if (imageSelected[index] || matchedPairs.value == words.length) return;
 
-    if (selectedImageIndex?.value == null) {
-      selectedImageIndex = index.obs;
+    if (selectedImageIndex.value == -1) {
+      // ตรวจสอบด้วย -1
+      selectedImageIndex.value = index;
       imageSelected[index] = true;
-    } else if (selectedImageIndex?.value == index) {
-      selectedImageIndex = null.obs as RxInt?;
+    } else if (selectedImageIndex.value == index) {
+      selectedImageIndex.value = -1;
       imageSelected[index] = false;
     }
 
-    if (selectedWordIndex?.value != null && selectedImageIndex?.value != null) {
-      if (words[selectedWordIndex!.value].imageUrl ==
-          images[selectedImageIndex!.value]) {
+    if (selectedWordIndex.value != -1 && selectedImageIndex.value != -1) {
+      if (words[selectedWordIndex.value].imageUrl ==
+          images[selectedImageIndex.value]) {
         matchedPairs.value++;
-        wordSelected[selectedWordIndex!.value] = true;
-        imageSelected[selectedImageIndex!.value] = true;
-        selectedWordIndex = null.obs as RxInt?;
-        selectedImageIndex = null.obs as RxInt?;
+        wordSelected[selectedWordIndex.value] = true;
+        imageSelected[selectedImageIndex.value] = true;
+        selectedWordIndex.value = -1;
+        selectedImageIndex.value = -1;
 
         if (matchedPairs.value == words.length) {
           Get.dialog(
@@ -87,10 +91,10 @@ class MatchingGameController extends GetxController {
         }
       } else {
         Future.delayed(Duration(milliseconds: 500), () {
-          wordSelected[selectedWordIndex!.value] = false;
-          imageSelected[selectedImageIndex!.value] = false;
-          selectedWordIndex = null.obs as RxInt?;
-          selectedImageIndex = null.obs as RxInt?;
+          wordSelected[selectedWordIndex.value] = false;
+          imageSelected[selectedImageIndex.value] = false;
+          selectedWordIndex.value = -1;
+          selectedImageIndex.value = -1;
         });
       }
     }
